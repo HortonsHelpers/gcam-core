@@ -63,7 +63,7 @@ server.register_function(set_pattern_scale)
 
 # Convert a string for color in "HTML" format to RGB triplets
 def rgb(triplet):
-    return (int(triplet[0:2], 16), int(triplet[2:4], 16), int(triplet[4:6], 16))
+    return int(triplet[:2], 16), int(triplet[2:4], 16), int(triplet[4:6], 16)
 
 # Replace a named HTML color with a named pattern
 # Warning we are assuming the pattern has already been created
@@ -230,12 +230,9 @@ def replace_color_with_gradient(image, drawable, color_str):
         while i < ctrl_points[1]:
             x_points.add(ctrl_points[2][i])
             y_points.add(ctrl_points[2][i+1])
-            i = i + 2
-        x_points = list(x_points)
-        y_points = list(y_points)
-        x_points.sort()
-        y_points.sort()
-
+            i += 2
+        x_points = sorted(x_points)
+        y_points = sorted(y_points)
         # Change the selection to just the current bar
         pdb.gimp_image_select_rectangle(image, CHANNEL_OP_REPLACE, x_points[0], y_points[0], x_points[-1] - x_points[0], y_points[-1] - y_points[0])
         # Apply the gradient across the current bar in a flat linear pattern

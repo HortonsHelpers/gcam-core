@@ -59,32 +59,23 @@ if __name__ == "__main__":
     for oldfile in oldfiles:
         newfile = os.path.join( newdir, os.path.basename(oldfile) )
         if not os.path.exists(newfile):
-            sys.stdout.write('ERROR : File does not exist: {}\n'.format(newfile))
+            sys.stdout.write(f'ERROR : File does not exist: {newfile}\n')
             misscount += 1
         else:
-            stat = xml_verify.compare_files(oldfile, newfile, args.v) 
+            stat = xml_verify.compare_files(oldfile, newfile, args.v)
             if stat != 0:
-                sys.stdout.write('ERROR: Discrepancy between files: {} and {}\n'.format(oldfile, newfile))
+                sys.stdout.write(
+                    f'ERROR: Discrepancy between files: {oldfile} and {newfile}\n'
+                )
                 statcount += 1
 
-    if misscount == 1:
-        fs = 'file'
-    else:
-        fs = 'files'
-    if statcount == 1:
-        ds = 'discrepancy'
-    else:
-        ds = 'discrepancies'
-
+    fs = 'file' if misscount == 1 else 'files'
+    ds = 'discrepancy' if statcount == 1 else 'discrepancies'
     nold = len(oldfiles)
-    if nold == 1:
-        fno = 'file'
-    else:
-        fno = 'files'
-
-    sys.stdout.write('{} {} tested.\n'.format(nold, fno))
-    sys.stdout.write('{} missing output {}.\n'.format(misscount, fs))
-    sys.stdout.write('{} file {}.\n'.format(statcount, ds))
+    fno = 'file' if nold == 1 else 'files'
+    sys.stdout.write(f'{nold} {fno} tested.\n')
+    sys.stdout.write(f'{misscount} missing output {fs}.\n')
+    sys.stdout.write(f'{statcount} file {ds}.\n')
 
     if nold == 0:
         sys.exit(1)             # failing to find any files to test is an error

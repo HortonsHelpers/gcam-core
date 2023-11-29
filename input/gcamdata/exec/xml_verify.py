@@ -45,13 +45,7 @@ def num_equiv(left, right):
         lx = float(left)
         ly = float(right)
 
-        if lx == floor(lx) and ly == floor(ly):
-            ## These numbers appear to be integers, so they're not
-            ## allowed to differ.
-            tol = 0
-        else: 
-            tol = ftol*(ffloor + abs(lx))
-            
+        tol = 0 if lx == floor(lx) and ly == floor(ly) else ftol*(ffloor + abs(lx))
         xdiff = abs(lx-ly)
         return xdiff <= tol
     except ValueError:
@@ -99,15 +93,10 @@ def strnormalize(s):
     """ 
 
     from math import floor
-    
+
     try:
         x = float(s)            # strips whitespace if it succeeds
-        if x == floor(x):
-            ## integer: return as-is
-            return str(int(x))
-        else:
-            ## floating point:  round to appropriate significant figures.
-            return str(signif(x,comparison_digits))
+        return str(int(x)) if x == floor(x) else str(signif(x,comparison_digits))
     except ValueError:
         ## The string isn't a number, so strip leading and trailing
         ## whitespace and return the rest as-is
@@ -133,11 +122,7 @@ def eltsortkey(elt):
     considered in the sort order.
     """
 
-    sortkey = []
-
-    sortkey.append(elt.tag)
-
-    sortkey.append(elt.get('name', default=''))
+    sortkey = [elt.tag, elt.get('name', default='')]
 
     attribs = sorted(elt.keys())
     sortkey.append(attribs)
@@ -173,7 +158,7 @@ def elements_equal(left, right):
 
     ## The first four parts of the key (tag, name, attributes, and
     ## attribute values) must match exactly.
-    if lkey[0:4] != rkey[0:4]:
+    if lkey[:4] != rkey[:4]:
         return False
 
     ## Check the text element separately. If it doesn't match, then
@@ -184,10 +169,7 @@ def elements_equal(left, right):
 
     ## As far as I know, we never use the tail of the element.  We'll
     ## just require it to be equal.
-    if lkey[5] != rkey[5]:
-        return False
-
-    return True
+    return lkey[5] == rkey[5]
     
 
 def eltdiff(left, right, path=None, outstream=stdout):
@@ -249,30 +231,30 @@ def eltdiff(left, right, path=None, outstream=stdout):
 def report_difference(left, right, path, outstream):
     """Report two nodes that differ to the supplied output stream."""
 
-    outstream.write('At: {}\n'.format(str(path)))
+    outstream.write(f'At: {str(path)}\n')
     outstream.write('\tLeft:\n')
     for row in eltsortkey(left):
-        outstream.write('\t\t{}\n'.format(str(row)))
+        outstream.write(f'\t\t{str(row)}\n')
     outstream.write('\tRight:\n')
     for row in eltsortkey(right):
-        outstream.write('\t\t{}\n'.format(str(row)))
+        outstream.write(f'\t\t{str(row)}\n')
     outstream.write('\n')
 
 def report_child_mismatch(left, right, path, outstream):
     """Report two nodes that have an unequal number of children to the output stream."""
 
-    outstream.write('At: {}\n'.format(str(path)))
+    outstream.write(f'At: {str(path)}\n')
     outstream.write('\tnode: {}  name= {}\n'.format(left.tag, left.get('name', default='')))
-    outstream.write('\tLeft:  {} child nodes\n'.format(len(left)))
-    outstream.write('\tRight: {} child nodes\n'.format(len(right)))
+    outstream.write(f'\tLeft:  {len(left)} child nodes\n')
+    outstream.write(f'\tRight: {len(right)} child nodes\n')
     outstream.write('\n')
 
 
 def compare_files(fleft, fright, verbose=True, vstream=stderr):
 
     if verbose:
-        vstream.write('### oldfile: {}    newfile: {}\n'.format(fleft, fright))
-    
+        vstream.write(f'### oldfile: {fleft}    newfile: {fright}\n')
+
     left = ET.parse(fleft).getroot()
     right = ET.parse(fright).getroot()
 
@@ -282,7 +264,7 @@ if __name__ == "__main__":
     from sys import argv, exit
 
     if len(argv) != 3:
-        stderr.write('Usage: {} file1 file2'.format(argv[0]))
+        stderr.write(f'Usage: {argv[0]} file1 file2')
         exit(2)
 
     ## Parse and compare the files.
